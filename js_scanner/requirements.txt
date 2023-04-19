@@ -1,0 +1,6 @@
+bs4
+lxml
+unittest
+urllib3
+requests
+python-Wappalyzer

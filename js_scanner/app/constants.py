@@ -1,0 +1,6 @@
+HTTP_STR: str = 'http'
+HTTPS_STR: str = 'https'
+LXML_STR: str = 'lxml'
+USER_AGENT: str = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0'
+REGEX_TO_GET_COMMENTS: str = '/\*.*?\*/|\/{2}.*?\n|\s'
+REGEX_TO_GET_FRAMEWORK_AND_VERSION: str = '.+?v\d+.\d+.\d+'
