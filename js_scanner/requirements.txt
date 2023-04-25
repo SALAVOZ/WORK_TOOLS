@@ -4,3 +4,5 @@ unittest
 urllib3
 requests
 python-Wappalyzer
+pandas
+xlsxwriter

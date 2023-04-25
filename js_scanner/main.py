@@ -1,7 +1,7 @@
 from app.requester import Requester
 from app.wappalyzer import Wappalyzer
 from app.snyk_api_handler import snyk_api_handler
-import app.constants
+from app.report import Report
 import argparse
 
 
@@ -12,9 +12,11 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--directory', type=str, required=False, default='', help='Write directory; default=\'\'')
     args = parser.parse_args()
     requester = Requester(args.host)
+    report = Report()
     requester.check_connection(directory=args.directory)
     wappalyzer = Wappalyzer(requester)
     snyk_api = snyk_api_handler()
     for d in [wappalyzer.frameworks_and_version_http, wappalyzer.frameworks_and_version_https]:
         result = snyk_api.parse_snyk(d)
+        report.write_excel(requester.host, result)
         print(result)
