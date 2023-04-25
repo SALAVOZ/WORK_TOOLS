@@ -32,7 +32,6 @@ class RequesterTest(unittest.TestCase):
         self.assertEqual(requester.response_http, None)
         self.assertEqual(requester.response_https, None)
 
-
     def test_make_request__success(self):
         requester = Requester(self.host)
         requester.check_connection()

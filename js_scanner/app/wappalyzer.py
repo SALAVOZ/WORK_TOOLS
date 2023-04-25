@@ -10,26 +10,32 @@ import requests
 Класс, свой ваппалайзер. Определяет версии и технологии, находит cve веб серверов исходя из версии, полученной из http-заголовка Server
 '''
 
-class Wappalyzer:
-    def __init__(self, html_text: str, requester: Requester) -> None:
-        self.html: str = html_text
-        self.requester: Requester = requester
-        if self.html is not None:
-            self.parse_html()
 
-    def parse_html(self) -> None:
-        soup = BeautifulSoup(self.html, app.constants.LXML_STR)
-        self.scripts = [script['src'] for script in
+class Wappalyzer:
+    def __init__(self, requester: Requester) -> None:
+        self.requester: Requester = requester
+        self.frameworks_and_version_http = []
+        self.frameworks_and_version_https = []
+        for protocol in [app.constants.HTTP_STR, app.constants.HTTPS_STR]:
+            html = self.requester.get_html(protocol)
+            if html is not None:
+                self.parse_html(html, protocol)
+
+    def parse_html(self, html: str, protocol: str) -> None:
+        soup = BeautifulSoup(html, app.constants.LXML_STR)
+        scripts = [script['src'] for script in
                         soup.findAll('script', src=True)]
-        self.meta = {
+        meta = {
             meta['name'].lower():
                 meta['content'] for meta in soup.findAll(
                     'meta', attrs=dict(name=True, content=True))
         }
-        self.frameworks_and_version = []
-        for script_src in self.scripts:
+        for script_src in scripts:
             framework, version = self.parse_js(script_src)
-            self.frameworks_and_version.append({'framework': framework, 'version': version})
+            if protocol == app.constants.HTTP_STR:
+                self.frameworks_and_version_http.append({'framework': framework, 'version': version})
+            if protocol == app.constants.HTTPS_STR:
+                self.frameworks_and_version_https.append({'framework': framework, 'version': version})
 
     def parse_js(self, url: str) -> tuple[str, str]:
         if 'http://' in url or 'https://' in url:
@@ -62,7 +68,7 @@ class Wappalyzer:
         pattern = re.compile(app.constants.REGEX_TO_GET_FRAMEWORK_AND_VERSION)
         found_string = pattern.search(string)
         if found_string is not None:
-            framework_and_version = re.sub(r'[*!/]', '', found_string.group(0)).strip()
+            framework_and_version = re.sub(r'[-*!/]', '', found_string.group(0)).strip()
             framework, version = framework_and_version.split()
             version = version.replace('v', '')
             return framework, version
@@ -86,150 +92,3 @@ class Wappalyzer:
                     print('Error in comparing version')
         print('Error in comparing. Not equal length of args')
         return False
-
-
-
-
-
-
-
-
-
-
-
-'''
-
-            try:
-                technologie = self.get_js_technologie(path)
-                version = self.get_js_through_url(path)
-            except requests.exceptions.ConnectionError:
-                print('=' * 10)
-                print('Error to connect to ' + path)
-                print('=' * 10)
-        else:
-            technologie = self.get_js_technologie(path)
-            version = self.get_js_through_path(path, schema, technologie)# ДОРАБОТАТЬ ФУНКЦИЮ
-        self.js_frameworks.append({
-            'path': path,
-            'version': version,
-            'technologie': technologie
-            })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def get_js_through_path(self, path, schema, technologie):
-        try:
-            url = f'{self.host}/{path}'.replace('//', '/')
-            url = schema + '://' + url
-            res = requests.get(url, verify=False)
-            if res.status_code == 404 and self.dir is not None:
-                url = f'{self.host}/{self.dir}/{path}'.replace('//', '/')
-                url = schema + '://' + url
-                res = requests.get(url, verify=False)
-            if res.request.url != url:
-                res = requests.get(res.request.url, verify=False, allow_redirects=True)
-            if res.status_code == 200:
-                re_result = re.search(r'v(\d+\.\d+\.\d+)', res.request.url, re.IGNORECASE)
-
-                if re_result is not None:
-                    return re_result.group(1)
-
-                re_result = re.search(r'\d+\.\d+\.\d+', res.text)
-                if re_result is not None:
-                    return re_result.group(0)
-
-                re_result = re.search(r'VERSION\s*=\s*[\"\']?(\d+\.\d\.\d+)[\"\']?', res.text, re.IGNORECASE)
-                if re_result is not None:
-                    return re_result.group(1)
-
-                re_result = re.search(fr'{technologie}\s*[=:]\s*[\"\']?(\d+\.\d\.\d+)[\"\']?', res.text, re.IGNORECASE)
-                if re_result is not None:
-                    return re_result.group(1)
-                return None
-        except requests.exceptions.ConnectionError:
-            print('=' * 10)
-            print('Connection error: ' + schema + '://' + self.requester.host + path)
-            print('=' * 10)
-
-    @staticmethod
-    def get_js_through_url(url):
-        try:
-            res = requests.get(url, verify=False)
-            re_result = re.search(r'\d+?.\d+?.\d+?', res.request.url)
-            if re_result is not None:
-                return re_result.group()
-            re_result = re.search(r'v\d+?.\d+?.\d+?', res.text)
-            if re_result is not None:
-                return re_result.group()
-        except requests.exceptions.ConnectionError:
-            print('=' * 10)
-            print('No Server header found')
-            print('=' * 10)
-
-
-    @staticmethod
-    def get_js_technologie(path):
-        try:
-            if 'http://' in path or 'https://' in path:
-                re_result = re.search(r'([-a-zA-Z]+)[-.@]+', path)
-                if re_result is None:
-                    re_result = re.search(r'/([a-z-A-Z]+)\?', path)
-                if re_result.group()[-1] == '-':
-                    return re_result.group().replace('/', '').replace('?', '').replace('.', '').replace('-', '')
-                return re_result.group().replace('/', '').replace('?', '').replace('.', '')
-            else:
-                re_result = re.search(r'([-a-zA-Z]+)[-.@]+', path)
-                if re_result is None:
-                    re_result = re.search(r'/([a-z-A-Z]+)\?', path)
-                if re_result.group()[-1] == '-':
-                    return re_result.group().replace('/', '').replace('?', '').replace('.', '').replace('-', '')
-                return re_result.group().replace('/', '').replace('?', '').replace('.', '')
-        except AttributeError:
-            print('Error in get_js_technologie')
-
-'''

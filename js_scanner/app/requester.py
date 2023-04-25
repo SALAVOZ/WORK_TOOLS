@@ -25,10 +25,10 @@ class Requester:
         self.response_http: requests.Response = None
         self.response_https: requests.Response = None
 
-    def check_connection(self) -> None:
+    def check_connection(self, directory: str = '') -> None:
         '''Проверяет соединение и сохраняет объект Response в переменные класса.'''
         if self.host is not None:
-            self.response_http, self.response_https = self.make_request(directory='/')
+            self.response_http, self.response_https = self.make_request(directory=directory)
         else:
             raise ValueError
 
@@ -51,12 +51,13 @@ class Requester:
         else:
             raise ValueError
 
-    def get_html(self, protocol: str) -> str:
+    def get_html(self, protocol: str) -> str | None:
         response: requests.Response = self.get_response_by_protocol(protocol=protocol)
         try:
             return response.text
         except AttributeError:
             print('No attribute text in variable response because response is not requests.Response type.')
+            return None
 
     def get_header_server(self, protocol: str) -> str:
         response: requests.Response = self.get_response_by_protocol(protocol=protocol)
