@@ -13,10 +13,10 @@ def generate_tokens(login, password, count_of_token):
     tokens = []
     with open('tokens', 'w') as file:
         for i in range(0, count_of_token):
-            VK = vk_api.VkApi(login, password, captcha_handler=captcha_handler)
+            VK = vk_api.VkApi(login, password, captcha_handler=captcha_handler, app_id=2685278)
             VK.auth(reauth=True)
             try:
-                VK = vk_api.VkApi(login, password,captcha_handler=captcha_handler)
+                VK = vk_api.VkApi(login, password,captcha_handler=captcha_handler, app_id=2685278)
                 VK.auth(reauth=True)
             except vk_api.exceptions.AuthError:
                 print('Error while auth')
