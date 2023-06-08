@@ -87,7 +87,8 @@ def get_request_people_by_age(url, job):
         result_control = False
         for person in people:
             if 'occupation' in person:
-                if job.upper() in person['occupation']['name'].replace('\'', '').replace('\"', '').replace('«', '').replace('»', '').upper().split():
+                j = person['occupation']['name'].replace('\'', '').replace('\"', '').replace('«', '').replace('»', '').upper()
+                if job.upper() in j.split() or job.upper() == j:
                     id_list.append([person['id'], person['first_name'], person['last_name'], person['occupation']['name']])
                     continue
                 print('Fake', person['first_name'], person['last_name'], person['occupation']['name'])
