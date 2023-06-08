@@ -19,7 +19,7 @@
         },
         "rfc2109": false,
         "secure": true,
-        "value": "vk1.a.IT0oG7_KiOtc-ePdFIsU4c9YZNM3e16OTP5jjp4rwLyGXeEhGaHuH5NL2iguMR9lIZe3CgsXz1T6H4NKVD8Ez6V76XdaBtjXkyAlTdKlVjWZuNbjknBT_zH4Znv37wE8Y8XOLBen-G7SUZCH1U3awvwDvuLE6tkybkdjcrczagc",
+        "value": "vk1.a.8RVPtkd-CdSDjauhJ5GkDSIaW8izlS3zyNDYEGcuSPAbD_RpVyBFHSxwDXTE-lhXNsM4PQ6jQ4ivHeggHgkT-TRZm-xKVrnVZscqgBTKzZ4rfYg5sITIYjkvvY76zG3vzh1PCccwXhnaMHV2GiQJxqnCIaGJ87RjofI_3z4iWuc",
         "version": 0
       },
       {
@@ -59,7 +59,7 @@
         },
         "rfc2109": false,
         "secure": true,
-        "value": "1_LYQ4fWgllhwimo6k3IxGdZZ_7AGVPZFmEWVbo2N76weOvTVIhzWhKI65DHN8Mv1cxi3Y0rKhrW3piKXoDyTzEA",
+        "value": "1_K6mFIZI9hhwGzEuQsUFULwHupHO9Y6MIXuqfBQv7lBl4his0axGLcrtGyTMdZsX7ORw2zB5Rs1yQb4_7Oj4-yw",
         "version": 0
       },
       {
@@ -78,7 +78,7 @@
         "rest": {},
         "rfc2109": false,
         "secure": true,
-        "value": "1694039514_jEEU7crbJfN3WXYPp8wjf2TN9cCzw8VU418B34rZWTT",
+        "value": "2098953155_jA0wNldxOYO3BVLsXmylwfJKdFOZYhwgIjNwoJGnr9P",
         "version": 0
       },
       {
@@ -97,7 +97,7 @@
         "rest": {},
         "rfc2109": false,
         "secure": true,
-        "value": "9081048470840816485_VWBm7tZx8wXSdq4YHBAiCWDzkZGzNJAwM12Jyz0V87T",
+        "value": "9069367259731215800_deDMQ1R6Fsigj21VBZbAguGCudWRsw5JqwSXxhtWHMP",
         "version": 0
       },
       {
@@ -137,7 +137,7 @@
         },
         "rfc2109": false,
         "secure": true,
-        "value": "YTZiNjgzZmFmZTYxODg4YjBmNWNmZDc3",
+        "value": "OTZmNTMyODEzMGM2MTA5NzVhNDk3MTY0",
         "version": 0
       },
       {
@@ -158,19 +158,9 @@
         },
         "rfc2109": false,
         "secure": true,
-        "value": "vk1.a.X4GhgbAPlYIHdh0ZavtLQBvykPQuRW_5Ode69CjexF-APE4DwkccchW6uTL8uFAk1C4aFjgE_DlvwVDKXDxLahxaC_HZIIrHLQQ70PwNAAYRXoTNDs02OrWi4ztQFZ5Kre3bWt3-m_KxAPJusGHIWhR5EWWoPQjtJdkt8EvljoXYKDn9dhWc4vWOcsf6DUAD",
+        "value": "vk1.a.i_00W1d3wgH8lbvBXbAJvFoggh5fxz5rfA8UErgDTf4_T9nfsP_jvs4YlfmS75rKYHYRoxAFR-6nJ9Jn2B9kj4y2bsdw-uwk2ZLDCTuygVGv8nOYVqo7s64E2d2ONR-deg7W5gWAgDwfqvy1_IdlIVdCYDPNfr-8Vb8hBOx_cRfsKoZwvne4ikpfa8_pF-kY",
         "version": 0
       }
-    ],
-    "token": {
-      "app2685278": {
-        "scope_140492255": {
-          "access_token": "vk1.a.QGnGplErDs9g2-CYGhHRcDkNrFqVhAwGsSYJ15pdkq7uD9bD80uPl5sJVAu16bUM_qO_mJLKIerwPGQqKEZ_se8Ez5gnViXkKs7ecUN_AAabKptR-UDKDG8dvpnijCcyBQafQxpCGspEJgG0UyGlck00sO0HcJfWTI49sdJygSVpZkA3OFoxMwCvigAlvN3xwipZJXhxdizOxlwrVrwfSw",
-          "email": "salik.abdulin@mail.ru",
-          "expires_in": "0",
-          "user_id": "155406498"
-        }
-      }
-    }
+    ]
   }
 }
