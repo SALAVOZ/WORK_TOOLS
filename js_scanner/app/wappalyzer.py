@@ -16,7 +16,12 @@ class Wappalyzer:
         self.requester: Requester = requester
         self.frameworks_and_version_http = []
         self.frameworks_and_version_https = []
+        self.web_server_version = {}
+        self.server_header = {}
         for protocol in [app.constants.HTTP_STR, app.constants.HTTPS_STR]:
+            server_header = requester.get_header_server(protocol)
+            if server_header is not None:
+                self.server_header = self.parse_web_server(server_header)
             html = self.requester.get_html(protocol)
             if html is not None:
                 self.parse_html(html, protocol)
@@ -31,13 +36,13 @@ class Wappalyzer:
                     'meta', attrs=dict(name=True, content=True))
         }
         for script_src in scripts:
-            framework, version = self.parse_js(script_src)
+            framework, version = self.parse_js(script_src, protocol)
             if protocol == app.constants.HTTP_STR:
                 self.frameworks_and_version_http.append({'framework': framework, 'version': version})
             if protocol == app.constants.HTTPS_STR:
                 self.frameworks_and_version_https.append({'framework': framework, 'version': version})
 
-    def parse_js(self, url: str) -> tuple[str, str]:
+    def parse_js(self, url: str, protocol: str) -> tuple[str, str]:
         if 'http://' in url or 'https://' in url:
             try:
                 response: requests.Response = requests.get(url=url)
@@ -45,9 +50,8 @@ class Wappalyzer:
                 response = None
             return self.parse_js__get_comments_and_get_framework_and_version_from_response(response)
         else:
-            response_http, response_https = self.requester.make_request(directory=url)
-            for response in [response_http, response_https]:
-                return self.parse_js__get_comments_and_get_framework_and_version_from_response(response)
+            response = self.requester.make_request_on_one_protocol(directory=url, protocol=protocol)
+            return self.parse_js__get_comments_and_get_framework_and_version_from_response(response)
 
     def parse_js__get_comments_and_get_framework_and_version_from_response(self, response: requests.Response) -> tuple[str, str]:
         html_text = response.text if response is not None else ''
@@ -66,13 +70,35 @@ class Wappalyzer:
     @staticmethod
     def parse_js_file__get_framework_and_version(string: str) -> tuple[str, str]:
         pattern = re.compile(app.constants.REGEX_TO_GET_FRAMEWORK_AND_VERSION)
-        found_string = pattern.search(string)
+        found_string = pattern.search(string[:200])
         if found_string is not None:
-            framework_and_version = re.sub(r'[-*!/]', '', found_string.group(0)).strip()
-            framework, version = framework_and_version.split()
-            version = version.replace('v', '')
-            return framework, version
+            try:
+                framework_and_version = re.sub(r'[-*!/]', '', found_string.group(0)).strip()
+                framework, version = framework_and_version.split()
+                version = version.replace('v', '')
+                return framework, version
+            except:
+                pass
         return '', ''
+
+    @staticmethod
+    def parse_web_server(server_header: str) -> dict | None:
+        to_return = {}
+        server_header_uppercase = server_header.upper()
+        if 'nginx'.upper() in server_header_uppercase:
+            to_return['name'] = 'nginx'
+        if 'apache'.upper() in server_header_uppercase:
+            to_return['name'] = 'apache'
+        version = re.search(r'\d+?.\d+?.\d+?', server_header_uppercase)
+        if version == '' or version is None:
+            return None
+        to_return['version'] = version.group(0)
+        try:
+            a = to_return['name']
+            return to_return
+        except KeyError:
+            pass
+        return None
 
     @staticmethod
     def comparing_version(version, comparing):

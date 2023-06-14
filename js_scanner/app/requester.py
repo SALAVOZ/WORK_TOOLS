@@ -19,37 +19,52 @@ get_response_by_protocol - получает строку ('http' или 'https')
 
 
 class Requester:
-    def __init__(self, host=None) -> None:
+    def __init__(self, host: str =None) -> None:
         '''Объект для работы с запросами. Собирает js запросы и проверяет протоколы http и https на открытость.'''
-        self.host: str = self.validate_host(host=host)
+        port = None
+        if ":" in host:
+            self.host, self.port = host.split(":")
+        else:
+            self.host: str = self.validate_host(host=host)
+            self.port = None
         self.response_http: requests.Response = None
         self.response_https: requests.Response = None
 
     def check_connection(self, directory: str = '') -> None:
         '''Проверяет соединение и сохраняет объект Response в переменные класса.'''
         if self.host is not None:
-            self.response_http, self.response_https = self.make_request(directory=directory)
+            self.response_http, self.response_https = self.make_request_on_all_protocols(directory=directory)
         else:
             raise ValueError
 
-    def make_request(self, directory: str = ''):
+    def make_request_on_all_protocols(self, directory: str = ''):
         '''Делает get запросы на http и https, в зависимости от того, прошло ли подключение в функции check_connection.'''
         if self.host is not None:
             for schema in [app.constants.HTTP_STR, app.constants.HTTPS_STR]:
                 if schema is not None:
-                    while directory.startswith('/'):
-                        directory = directory[1:]
-                    try:
-                        response = requests.get(schema + '://' + self.host + '/' + directory, verify=False, timeout=10, headers={
-                            'User-Agent': app.constants.USER_AGENT
-                            })
-                    except requests.exceptions.ConnectionError:
-                        response = None
-                    except requests.exceptions.Timeout:
-                        response = None
+                    response = self.make_request_on_one_protocol(schema, directory)
                     yield response
         else:
             raise ValueError
+
+    def make_request_on_one_protocol(self, protocol: str, directory: str = '') -> requests.Response | None:
+        response = None
+        try:
+            while directory.startswith('/'):
+                directory = directory[1:]
+            host = self.host
+            if self.port is not None:
+                host = self.host + ":" + self.port
+            print('=' * 50 + '\n' + 'Making request to ' + protocol + '://' + host + '/' + directory)
+            response = requests.get(protocol + '://' + host + '/' + directory, verify=False, timeout=2, headers={
+                'User-Agent': app.constants.USER_AGENT
+            }, allow_redirects=True)
+            print('Response: ' + str(response) + '\n' + '=' * 50 + '\n')
+            if response is not None:
+                print(host, response.status_code, directory)
+        except:
+            response = None
+        return response
 
     def get_html(self, protocol: str) -> str | None:
         response: requests.Response = self.get_response_by_protocol(protocol=protocol)
@@ -59,7 +74,7 @@ class Requester:
             print('No attribute text in variable response because response is not requests.Response type.')
             return None
 
-    def get_header_server(self, protocol: str) -> str:
+    def get_header_server(self, protocol: str) -> str | None:
         response: requests.Response = self.get_response_by_protocol(protocol=protocol)
         try:
             return response.headers['Server']
@@ -67,6 +82,7 @@ class Requester:
             print('No attribute headers in variable response because response is not requests.Response type.')
         except KeyError:
             print('No header \'Server\' in http response')
+        return None
 
     def get_response_by_protocol(self, protocol: str) -> requests.Response | None:
         response: requests.Response

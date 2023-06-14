@@ -1,8 +1,9 @@
-bs4
+bs4~=0.0.1
 lxml
-unittest
-urllib3
-requests
+urllib3~=2.0.3
+requests~=2.31.0
 python-Wappalyzer
 pandas
-xlsxwriter
+xlsxwriter~=3.1.2
+beautifulsoup4~=4.12.2
+openpyxl

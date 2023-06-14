@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+import app.constants
+
 
 class snyk_api_handler:
     def __init__(self):
@@ -27,11 +29,16 @@ class snyk_api_handler:
                         vuln_obj = {
                             'version': fram['version'],
                             'technologie': fram['framework'],
-                            'vuln': []
+                            'vuln': [],
+                            'cvss': 0,
+                            'url': ''
                         }
                         a = tr.find('a')['href']
-                        res = requests.get(f'https://security.snyk.io/{a}')
-                        soup = BeautifulSoup(res.text, 'lxml')
+                        url = f'https://security.snyk.io/{a}'
+                        vuln_obj['url'] = url
+                        res = requests.get(url)
+                        soup = BeautifulSoup(res.text, app.constants.LXML_STR)
+                        vuln_obj['cvss'] = soup.find('div', class_='severity-widget__score severity-medium big').attrs['data-snyk-test-score']
                         div = soup.find('div', class_='vuln-info-block')
                         spans = div.find_all('span')
                         for span in spans:
@@ -109,7 +116,7 @@ class snyk_api_handler:
                     try:
                         cve = li.find('a', text=re.compile(r'CVE-\d+-\d+')).text
                         vulnerable.append({
-                            'Server': f'Nginx {version_from_response}',
+                            'name': f'Nginx {version_from_response}',
                             'vuln': cve
                         })
                     except Exception:
@@ -140,26 +147,26 @@ class snyk_api_handler:
                         if '>' in condition:
                             if '=' in condition and version_from_response == condition:
                                 vulnerable.append({
-                                    'Server': f'Apache {version_from_response}',
+                                    'name': f'Apache {version_from_response}',
                                     'vuln': cve})
                             if self.comparing_version(version_from_response, condition):
                                 vulnerable.append({
-                                    'Server': f'Apache {version_from_response}',
+                                    'name': f'Apache {version_from_response}',
                                     'vuln': cve})
                             continue
                         if '<' in condition:
                             if '=' in condition and version_from_response == condition:
                                 vulnerable.append({
-                                    'Server': f'Apache {version_from_response}',
+                                    'name': f'Apache {version_from_response}',
                                     'vuln': cve})
                             if not(self.comparing_version(version_from_response, condition)):
                                 vulnerable.append({
-                                    'Server': f'Apache {version_from_response}',
+                                    'name': f'Apache {version_from_response}',
                                     'vuln': cve})
                             continue
                         if version_from_response == condition:
                             vulnerable.append({
-                                'Server': f'Apache {version_from_response}',
+                                'name': f'Apache {version_from_response}',
                                 'vuln': cve
                             })
         return vulnerable
