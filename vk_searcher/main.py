@@ -13,10 +13,10 @@ def generate_tokens(login, password, count_of_token):
     tokens = []
     with open('tokens', 'w') as file:
         for i in range(0, count_of_token):
-            VK = vk_api.VkApi(login, password, captcha_handler=captcha_handler, app_id=2685278)
+            VK = vk_api.VkApi(login, password, captcha_handler=captcha_handler, app_id=2685278, auth_handler=auth_handler)
             VK.auth(reauth=True)
             try:
-                VK = vk_api.VkApi(login, password,captcha_handler=captcha_handler, app_id=2685278)
+                VK = vk_api.VkApi(login, password,captcha_handler=captcha_handler, app_id=2685278, auth_handler=auth_handler)
                 VK.auth(reauth=True)
             except vk_api.exceptions.AuthError:
                 print('Error while auth')
@@ -103,6 +103,18 @@ def captcha_handler(captcha):
     return captcha.try_again(key)
 
 
+def auth_handler():
+    """ При двухфакторной аутентификации вызывается эта функция.
+    """
+
+    # Код двухфакторной аутентификации
+    key = input("Enter authentication code: ")
+    # Если: True - сохранить, False - не сохранять.
+    remember_device = True
+
+    return key, remember_device
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Write args: ')
     parser.add_argument('-j', '--job', type=str, required=True, help='Write job place')
@@ -111,6 +123,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--password', type=str, required=True, help='Write your password')
     parser.add_argument('-f', '--file', type=str, required=True, help='Write name of output csv file')
     args = parser.parse_args()
+
 
     job = args.job.replace('\'', '').replace('\"', '')
     login = args.login.replace('\'', '').replace('\"', '')
@@ -121,16 +134,39 @@ if __name__ == '__main__':
         exit(-1)
     count_of_tokens = args.tokens
 
-    tokens = generate_tokens(login, password, count_of_tokens)
+    # token = generate_tokens(login, password, 1)
+    tokens = open('tokens', 'r').readlines()
+    vk_session = vk_api.VkApi(token=tokens[0])
+    vk = vk_session.get_api()
+
+    # ID группы, для которой вы хотите получить список пользователей
+    group_id = 'kigres_ogk2'
+
+    # Получаем список участников группы
+    people_result = vk.groups.getMembers(group_id=group_id)
     print('Searching started')
-    people_result = [get_request_people_by_age(url, job) for url in [build_url_get_people_by_job(job, random.choice(tokens), age) for age in range(0, 100, 2)]]
+    # people_result = [get_request_people_by_age(url, job) for url in [build_url_get_people_by_job(job, random.choice(tokens), age) for age in range(0, 100, 2)]]
     count = 0
+    csv_file = open(file_name, 'a', newline='')
+    writer = csv.writer(csv_file)
+    for user_id in people_result['items']:
+        user_info = list(vk.users.get(user_ids=user_id)[0].values())
+        print(user_info)
+        try:
+            writer.writerow(user_info)
+        except Exception as ex:
+            print(ex)
+    """
     csv_file = open(file_name, 'a', newline='')
     writer = csv.writer(csv_file)
     for people_list in people_result:
         for person in people_list:
-            writer.writerow([person[0],person[1], person[2], person[3]])
+            try:
+                writer.writerow([person[0],person[1], person[2], person[3]])
+            except:
+                pass
             count += 1
     print('count of found people', count)
     print('count of fake people', fake_people_count)
     #   3832
+    """
